@@ -1,0 +1,175 @@
+:root {
+    --primary-color: #008B8B;
+    --secondary-color: #90EE90;
+    --dark-color: #004444;
+    --light-color: #FFFFFF;
+    --gradient-overlay: linear-gradient(135deg, rgba(0,139,139,0.95), rgba(0,68,68,0.85));
+}
+
+body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+.navbar {
+    background: var(--primary-color);
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand img {
+    height: 40px;
+}
+
+.navbar-nav .nav-link {
+    color: var(--light-color) !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--secondary-color) !important;
+}
+
+.btn-primary {
+    background: var(--secondary-color);
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    color: var(--dark-color);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: #7FDD7F;
+    transform: translateY(-2px);
+}
+
+.card {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.wave-divider {
+    position: relative;
+    height: 150px;
+    overflow: hidden;
+}
+
+.wave-divider::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+    background: var(--primary-color);
+    clip-path: polygon(0 45%, 100% 0, 100% 100%, 0% 100%);
+}
+
+.section-header {
+    color: var(--primary-color);
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+}
+
+.table {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.table thead {
+    background: var(--primary-color);
+    color: var(--light-color);
+}
+
+.table th {
+    font-weight: 600;
+    padding: 1rem;
+}
+
+.table td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+.form-control {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    border: 2px solid #eee;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: none;
+}
+
+.alert {
+    border-radius: 10px;
+    border: none;
+    padding: 1rem 1.5rem;
+}
+
+.alert-success {
+    background: var(--secondary-color);
+    color: var(--dark-color);
+}
+
+.container {
+    padding: 2rem 1rem;
+}
+
+/* Status badges */
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-weight: 500;
+}
+
+.badge-primary {
+    background: var(--primary-color);
+    color: var(--light-color);
+}
+
+.badge-secondary {
+    background: var(--secondary-color);
+    color: var(--dark-color);
+}
+
+/* Loading spinner */
+.spinner-border {
+    color: var(--primary-color);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--dark-color);
+} 
