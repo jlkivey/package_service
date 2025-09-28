@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{layout/main :: html}">
+<div th:fragment="content">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="section-header">Inbound Shipments</h1>
+        </div>
+        <div class="col text-end">
+            <a href="/shipments/new" class="btn btn-primary">
+                <i class="fas fa-plus"></i> New Shipment
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form th:action="@{/shipments}" method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Client</label>
+                    <input type="text" class="form-control" name="client" th:value="${param.client}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-control" name="status">
+                        <option value="">All</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Received">Received</option>
+                        <option value="Processing">Processing</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Date Range</label>
+                    <input type="date" class="form-control" name="date" th:value="${param.date}">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Shipments Table -->
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Tracking Number</th>
+                    <th>Client</th>
+                    <th>Status</th>
+                    <th>Order Number</th>
+                    <th>Ship Date</th>
+                    <th>Scan Time</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="shipment : ${shipments}">
+                    <td th:text="${shipment.trackingNumber}"></td>
+                    <td th:text="${shipment.client}"></td>
+                    <td>
+                        <span class="badge" 
+                              th:classappend="${shipment.status == 'Completed' ? 'badge-success' : 'badge-primary'}"
+                              th:text="${shipment.status}"></span>
+                    </td>
+                    <td th:text="${shipment.orderNumber}"></td>
+                    <td th:text="${#temporals.format(shipment.shipDate, 'MM/dd/yyyy')}"></td>
+                    <td th:text="${shipment.scanTime != null ? #temporals.format(shipment.scanTime, 'MM/dd/yyyy HH:mm') : 'Not Scanned'}"></td>
+                    <td>
+                        <div class="btn-group">
+                            <a th:href="@{/shipments/{id}(id=${shipment.rowId})}" 
+                               class="btn btn-sm btn-outline-primary"
+                               data-bs-toggle="tooltip"
+                               title="View Details">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a th:href="@{/shipments/{id}/edit(id=${shipment.rowId})}" 
+                               class="btn btn-sm btn-outline-secondary"
+                               data-bs-toggle="tooltip"
+                               title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-danger"
+                                    data-bs-toggle="tooltip"
+                                    title="Delete"
+                                    th:onclick="'deleteShipment(' + ${shipment.rowId} + ')'">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(shipments)}">
+                    <td colspan="7" class="text-center">No shipments found</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <nav th:if="${totalPages > 1}" aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/shipments(page=${currentPage - 1})}" tabindex="-1">Previous</a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                th:classappend="${currentPage == i ? 'active' : ''}">
+                <a class="page-link" th:href="@{/shipments(page=${i})}" th:text="${i + 1}"></a>
+            </li>
+            <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/shipments(page=${currentPage + 1})}">Next</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+</html> 
