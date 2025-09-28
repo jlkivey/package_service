@@ -35,4 +35,11 @@ public interface InboundShipmentService {
     
     // Search method
     InboundShipmentSearchResponse searchShipments(InboundShipmentSearchRequest searchRequest);
+    
+    // Distinct list methods with caching
+    List<String> getDistinctScanUsers();
+    List<String> getDistinctStatuses();
+    
+    // Cache management
+    void evictDistinctListsCache();
 } 
