@@ -154,4 +154,23 @@ public interface InboundShipmentRepository extends JpaRepository<InboundShipment
         @Param("lastUpdateDatetimeTo") LocalDate lastUpdateDatetimeTo,
         Pageable pageable
     );
+    
+    // Distinct query methods for caching
+    @Query(value = """
+        SELECT DISTINCT Scan_User 
+        FROM Inbound_Shipments 
+        WHERE Scan_User IS NOT NULL 
+        AND Scan_User <> ''
+        ORDER BY Scan_User
+        """, nativeQuery = true)
+    List<String> findDistinctScanUsers();
+    
+    @Query(value = """
+        SELECT DISTINCT Status 
+        FROM Inbound_Shipments 
+        WHERE Status IS NOT NULL 
+        AND Status <> ''
+        ORDER BY Status
+        """, nativeQuery = true)
+    List<String> findDistinctStatuses();
 } 
