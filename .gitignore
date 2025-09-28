@@ -54,24 +54,16 @@ buildNumber.properties
 ehthumbs.db
 Thumbs.db
 
-# Application specific
+# Logs
 logs/
 *.log
-*.log.*
-
-# Environment files with secrets
-.env
-.env.local
-.env.production
-application-local.properties
-application-secrets.properties
-
-# Keystore files
-*.jks
-*.p12
-*.pfx
-keystore/
 
 # Temporary files
 *.tmp
 *.temp
+
+# Keystore files (if they contain sensitive data)
+# Uncomment the next line if keystore files should not be committed
+# *.jks
+# *.p12
+# *.pfx
