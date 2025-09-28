@@ -302,4 +302,13 @@ public class InboundShipmentController {
         List<String> statuses = service.getDistinctStatuses();
         return statuses.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(statuses);
     }
+    
+    @PostMapping("/distinct/refresh-cache")
+    @Operation(summary = "Refresh distinct lists cache", 
+               description = "Manually refreshes the cache for distinct scan users and statuses. Use this when you know the data has changed.")
+    @ApiResponse(responseCode = "200", description = "Cache refreshed successfully")
+    public ResponseEntity<String> refreshDistinctListsCache() {
+        service.evictDistinctListsCache();
+        return ResponseEntity.ok("Cache refreshed successfully. Next requests will fetch fresh data from the database.");
+    }
 } 

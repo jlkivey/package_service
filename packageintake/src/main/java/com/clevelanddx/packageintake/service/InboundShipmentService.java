@@ -39,4 +39,7 @@ public interface InboundShipmentService {
     // Distinct list methods with caching
     List<String> getDistinctScanUsers();
     List<String> getDistinctStatuses();
+    
+    // Cache management
+    void evictDistinctListsCache();
 } 

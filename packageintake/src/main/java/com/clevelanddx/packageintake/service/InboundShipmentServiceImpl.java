@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
 
 import java.time.LocalDateTime;
 import java.time.LocalDate;
@@ -254,5 +255,11 @@ public class InboundShipmentServiceImpl implements InboundShipmentService {
     @Cacheable(value = "statuses", key = "'all'")
     public List<String> getDistinctStatuses() {
         return repository.findDistinctStatuses();
+    }
+    
+    @CacheEvict(value = {"scanUsers", "statuses"}, allEntries = true)
+    public void evictDistinctListsCache() {
+        // This method will clear the cache for both scan users and statuses
+        // The @CacheEvict annotation handles the actual cache clearing
     }
 } 
