@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.time.LocalDateTime;
 import java.time.LocalDate;
@@ -241,5 +242,17 @@ public class InboundShipmentServiceImpl implements InboundShipmentService {
             .hasNext(page.hasNext())
             .hasPrevious(page.hasPrevious())
             .build();
+    }
+    
+    @Override
+    @Cacheable(value = "scanUsers", key = "'all'")
+    public List<String> getDistinctScanUsers() {
+        return repository.findDistinctScanUsers();
+    }
+
+    @Override
+    @Cacheable(value = "statuses", key = "'all'")
+    public List<String> getDistinctStatuses() {
+        return repository.findDistinctStatuses();
     }
 } 

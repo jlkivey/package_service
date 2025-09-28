@@ -282,4 +282,24 @@ public class InboundShipmentController {
             return ResponseEntity.badRequest().build();
         }
     }
+    
+    @GetMapping("/distinct/scan-users")
+    @Operation(summary = "Get all distinct scan users", 
+               description = "Returns a cached list of all unique scan users from the inbound shipments table")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved distinct scan users")
+    @ApiResponse(responseCode = "204", description = "No scan users found")
+    public ResponseEntity<List<String>> getDistinctScanUsers() {
+        List<String> scanUsers = service.getDistinctScanUsers();
+        return scanUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(scanUsers);
+    }
+
+    @GetMapping("/distinct/statuses")
+    @Operation(summary = "Get all distinct statuses", 
+               description = "Returns a cached list of all unique statuses from the inbound shipments table")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved distinct statuses")
+    @ApiResponse(responseCode = "204", description = "No statuses found")
+    public ResponseEntity<List<String>> getDistinctStatuses() {
+        List<String> statuses = service.getDistinctStatuses();
+        return statuses.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(statuses);
+    }
 } 
