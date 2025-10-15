@@ -28,7 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>17</java.version>
-		<lombok.version>1.18.32</lombok.version>
+		<lombok.version>1.18.34</lombok.version>
 		<nimbus-jose-jwt.version>9.31</nimbus-jose-jwt.version>
 	</properties>
 	<dependencies>
@@ -137,16 +137,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.13.0</version>
+				<version>3.11.0</version>
 				<configuration>
 					<release>17</release>
-					<annotationProcessorPaths>
-						<path>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-							<version>${lombok.version}</version>
-						</path>
-					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 		</plugins>
