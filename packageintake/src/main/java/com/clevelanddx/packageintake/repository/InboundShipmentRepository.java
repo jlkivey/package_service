@@ -178,7 +178,7 @@ public interface InboundShipmentRepository extends JpaRepository<InboundShipment
     @Query(value = """
         SELECT s.Row_ID, s.Tracking_Number, s.Scanned_Number, s.Status, s.Order_Number, 
                s.Lab, s.Scan_User, s.Ship_Date, s.Scan_Time, s.Email_Receive_Datetime, 
-               s.Last_Update_Datetime, s.Client_ID, s.Shipment_Type_ID
+               s.Last_Update_Datetime, s.Client_ID, s.Shipment_Type
         FROM Inbound_Shipments s
         LEFT JOIN Inbound_Shipments_Clients c ON s.Client_ID = c.Row_ID
         WHERE (:trackingNumber IS NULL OR s.Tracking_Number LIKE CONCAT('%', :trackingNumber, '%'))
