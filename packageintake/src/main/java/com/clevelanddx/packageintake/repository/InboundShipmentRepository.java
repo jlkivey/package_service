@@ -187,7 +187,7 @@ public interface InboundShipmentRepository extends JpaRepository<InboundShipment
         AND (:orderNumber IS NULL OR s.Order_Number LIKE CONCAT('%', :orderNumber, '%'))
         AND (:lab IS NULL OR s.Lab LIKE CONCAT('%', :lab, '%'))
         AND (:scanUser IS NULL OR s.Scan_User LIKE CONCAT('%', :scanUser, '%'))
-        AND (:clientName IS NULL OR c.Client LIKE CONCAT('%', :clientName, '%'))
+        AND (:clientName IS NULL OR c.[Client] LIKE CONCAT('%', :clientName, '%'))
         AND (:shipDateFrom IS NULL OR s.Ship_Date >= :shipDateFrom)
         AND (:shipDateTo IS NULL OR s.Ship_Date <= :shipDateTo)
         AND (:scanDateFrom IS NULL OR CAST(s.Scan_Time AS DATE) >= :scanDateFrom)
