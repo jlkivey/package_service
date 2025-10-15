@@ -173,4 +173,44 @@ public interface InboundShipmentRepository extends JpaRepository<InboundShipment
         ORDER BY Status
         """, nativeQuery = true)
     List<String> findDistinctStatuses();
+    
+    // V2 Search method with client name support
+    @Query(value = """
+        SELECT s.* FROM Inbound_Shipments s
+        LEFT JOIN Inbound_Shipments_Clients c ON s.Client_ID = c.Row_ID
+        WHERE (:trackingNumber IS NULL OR s.Tracking_Number LIKE CONCAT('%', :trackingNumber, '%'))
+        AND (:scannedNumber IS NULL OR s.Scanned_Number LIKE CONCAT('%', :scannedNumber, '%'))
+        AND (:status IS NULL OR s.Status LIKE CONCAT('%', :status, '%'))
+        AND (:orderNumber IS NULL OR s.Order_Number LIKE CONCAT('%', :orderNumber, '%'))
+        AND (:lab IS NULL OR s.Lab LIKE CONCAT('%', :lab, '%'))
+        AND (:scanUser IS NULL OR s.Scan_User LIKE CONCAT('%', :scanUser, '%'))
+        AND (:clientName IS NULL OR c.Client LIKE CONCAT('%', :clientName, '%'))
+        AND (:shipDateFrom IS NULL OR s.Ship_Date >= :shipDateFrom)
+        AND (:shipDateTo IS NULL OR s.Ship_Date <= :shipDateTo)
+        AND (:scanDateFrom IS NULL OR CAST(s.Scan_Time AS DATE) >= :scanDateFrom)
+        AND (:scanDateTo IS NULL OR CAST(s.Scan_Time AS DATE) <= :scanDateTo)
+        AND (:emailReceiveDatetimeFrom IS NULL OR CAST(s.Email_Receive_Datetime AS DATE) >= :emailReceiveDatetimeFrom)
+        AND (:emailReceiveDatetimeTo IS NULL OR CAST(s.Email_Receive_Datetime AS DATE) <= :emailReceiveDatetimeTo)
+        AND (:lastUpdateDatetimeFrom IS NULL OR CAST(s.Last_Update_Datetime AS DATE) >= :lastUpdateDatetimeFrom)
+        AND (:lastUpdateDatetimeTo IS NULL OR CAST(s.Last_Update_Datetime AS DATE) <= :lastUpdateDatetimeTo)
+        ORDER BY s.Row_ID DESC
+        """, nativeQuery = true)
+    Page<InboundShipment> searchShipmentsV2(
+        @Param("trackingNumber") String trackingNumber,
+        @Param("scannedNumber") String scannedNumber,
+        @Param("status") String status,
+        @Param("orderNumber") String orderNumber,
+        @Param("lab") String lab,
+        @Param("scanUser") String scanUser,
+        @Param("clientName") String clientName,
+        @Param("shipDateFrom") LocalDate shipDateFrom,
+        @Param("shipDateTo") LocalDate shipDateTo,
+        @Param("scanDateFrom") LocalDate scanDateFrom,
+        @Param("scanDateTo") LocalDate scanDateTo,
+        @Param("emailReceiveDatetimeFrom") LocalDate emailReceiveDatetimeFrom,
+        @Param("emailReceiveDatetimeTo") LocalDate emailReceiveDatetimeTo,
+        @Param("lastUpdateDatetimeFrom") LocalDate lastUpdateDatetimeFrom,
+        @Param("lastUpdateDatetimeTo") LocalDate lastUpdateDatetimeTo,
+        Pageable pageable
+    );
 } 

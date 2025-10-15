@@ -1,6 +1,7 @@
 package com.clevelanddx.packageintake.service;
 
 import com.clevelanddx.packageintake.dto.InboundShipmentSearchRequest;
+import com.clevelanddx.packageintake.dto.InboundShipmentSearchRequestV2;
 import com.clevelanddx.packageintake.dto.InboundShipmentSearchResponse;
 import com.clevelanddx.packageintake.model.InboundShipment;
 import com.clevelanddx.packageintake.model.InboundShipmentReference;
@@ -222,6 +223,43 @@ public class InboundShipmentServiceImpl implements InboundShipmentService {
             searchRequest.getOrderNumber(),
             searchRequest.getLab(),
             searchRequest.getScanUser(),
+            searchRequest.getShipDateFrom(),
+            searchRequest.getShipDateTo(),
+            searchRequest.getScanDateFrom(),
+            searchRequest.getScanDateTo(),
+            searchRequest.getEmailReceiveDatetimeFrom(),
+            searchRequest.getEmailReceiveDatetimeTo(),
+            searchRequest.getLastUpdateDatetimeFrom(),
+            searchRequest.getLastUpdateDatetimeTo(),
+            pageable
+        );
+        
+        // Build response
+        return InboundShipmentSearchResponse.builder()
+            .shipments(page.getContent())
+            .totalElements(page.getTotalElements())
+            .totalPages(page.getTotalPages())
+            .currentPage(page.getNumber())
+            .pageSize(page.getSize())
+            .hasNext(page.hasNext())
+            .hasPrevious(page.hasPrevious())
+            .build();
+    }
+    
+    @Override
+    public InboundShipmentSearchResponse searchShipmentsV2(InboundShipmentSearchRequestV2 searchRequest) {
+        // Create pageable object
+        Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize());
+        
+        // Call repository V2 search method
+        Page<InboundShipment> page = repository.searchShipmentsV2(
+            searchRequest.getTrackingNumber(),
+            searchRequest.getScannedNumber(),
+            searchRequest.getStatus(),
+            searchRequest.getOrderNumber(),
+            searchRequest.getLab(),
+            searchRequest.getScanUser(),
+            searchRequest.getClientName(),
             searchRequest.getShipDateFrom(),
             searchRequest.getShipDateTo(),
             searchRequest.getScanDateFrom(),
