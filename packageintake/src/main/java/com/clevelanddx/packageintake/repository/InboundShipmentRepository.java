@@ -174,20 +174,21 @@ public interface InboundShipmentRepository extends JpaRepository<InboundShipment
         """, nativeQuery = true)
     List<String> findDistinctStatuses();
     
-    // V2 Search method with client name support
+    // V2 Search method with client name support - simplified to avoid JOIN mapping issues
     @Query(value = """
-        SELECT s.Row_ID, s.Tracking_Number, s.Scanned_Number, s.Status, s.Order_Number, 
-               s.Lab, s.Scan_User, s.Ship_Date, s.Scan_Time, s.Email_Receive_Datetime, 
-               s.Last_Update_Datetime, s.Client_ID, s.Shipment_Type
+        SELECT s.Row_ID, s.Client, s.Tracking_Number, s.Scanned_Number, s.Status, 
+               s.Email_ID, s.Order_Number, s.Ship_Date, s.Lab, s.Weight, 
+               s.Number_Of_Samples, s.Pickup_Time, s.Pickup_Time_2, 
+               s.Email_Receive_Datetime, s.Last_Update_Datetime, s.Scan_Time, 
+               s.Scan_User, s.Client_ID, s.Shipment_Type
         FROM Inbound_Shipments s
-        LEFT JOIN Inbound_Shipments_Clients c ON s.Client_ID = c.Row_ID
         WHERE (:trackingNumber IS NULL OR s.Tracking_Number LIKE CONCAT('%', :trackingNumber, '%'))
         AND (:scannedNumber IS NULL OR s.Scanned_Number LIKE CONCAT('%', :scannedNumber, '%'))
         AND (:status IS NULL OR s.Status LIKE CONCAT('%', :status, '%'))
         AND (:orderNumber IS NULL OR s.Order_Number LIKE CONCAT('%', :orderNumber, '%'))
         AND (:lab IS NULL OR s.Lab LIKE CONCAT('%', :lab, '%'))
         AND (:scanUser IS NULL OR s.Scan_User LIKE CONCAT('%', :scanUser, '%'))
-        AND (:clientName IS NULL OR LOWER(c.Client) LIKE LOWER(CONCAT('%', :clientName, '%')))
+        AND (:clientName IS NULL OR LOWER(s.Client) LIKE LOWER(CONCAT('%', :clientName, '%')))
         AND (:shipDateFrom IS NULL OR s.Ship_Date >= :shipDateFrom)
         AND (:shipDateTo IS NULL OR s.Ship_Date <= :shipDateTo)
         AND (:scanDateFrom IS NULL OR CAST(s.Scan_Time AS DATE) >= :scanDateFrom)
