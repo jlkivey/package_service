@@ -35,4 +35,37 @@ public class Client {
     @Column(name = "Last_Update_User")
     @Schema(description = "Last update user", example = "john.doe")
     private String lastUpdateUser;
+
+    // Manual getters and setters for Lombok compatibility issues
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getClient() {
+        return client;
+    }
+
+    public void setClient(String client) {
+        this.client = client;
+    }
+
+    public LocalDateTime getLastUpdateTime() {
+        return lastUpdateTime;
+    }
+
+    public void setLastUpdateTime(LocalDateTime lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
+    }
+
+    public String getLastUpdateUser() {
+        return lastUpdateUser;
+    }
+
+    public void setLastUpdateUser(String lastUpdateUser) {
+        this.lastUpdateUser = lastUpdateUser;
+    }
 } 
