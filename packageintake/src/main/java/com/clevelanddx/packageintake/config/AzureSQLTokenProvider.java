@@ -4,6 +4,8 @@ import com.azure.core.credential.TokenRequestContext;
 import com.azure.identity.ClientSecretCredential;
 import com.azure.identity.ClientSecretCredentialBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Slf4j
 @Component
 public class AzureSQLTokenProvider {
+    private static final Logger log = LoggerFactory.getLogger(AzureSQLTokenProvider.class);
     private final ClientSecretCredential credential;
     private final AtomicReference<String> cachedToken = new AtomicReference<>();
     private final AtomicReference<Instant> tokenExpiry = new AtomicReference<>();
