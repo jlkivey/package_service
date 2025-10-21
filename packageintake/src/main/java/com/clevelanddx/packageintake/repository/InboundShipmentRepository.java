@@ -83,31 +83,10 @@ public interface InboundShipmentRepository extends JpaRepository<InboundShipment
     @Query(value = """
         SELECT *
         FROM Inbound_Shipments
-        WHERE (
-            (
-                :scannedNumber IS NOT NULL AND
-                :scannedNumber <> '' AND
-                scanned_number IS NOT NULL AND
-                scanned_number <> '' AND
-                scanned_number = :scannedNumber
-            )
-            OR
-            (
-                NOT EXISTS (
-                    SELECT 1
-                    FROM Inbound_Shipments
-                    WHERE :scannedNumber IS NOT NULL AND
-                          :scannedNumber <> '' AND
-                          scanned_number IS NOT NULL AND
-                          scanned_number <> '' AND
-                          scanned_number = :scannedNumber
-                )
-                AND :scannedNumber LIKE CONCAT('%', Tracking_Number, '%')
-                AND Tracking_Number IS NOT NULL
-                AND Tracking_Number <> ''
-                AND LEN(:scannedNumber) > 9
-            )
-        )
+        WHERE :scannedNumber LIKE CONCAT('%', Tracking_Number, '%')
+        AND Tracking_Number IS NOT NULL
+        AND Tracking_Number <> ''
+        AND LEN(:scannedNumber) > 9
         ORDER BY Row_ID DESC
         """, nativeQuery = true)
     List<InboundShipment> findAllByTrackingNumberInScannedNumber(@Param("scannedNumber") String scannedNumber);
