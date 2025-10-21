@@ -154,4 +154,67 @@ public interface InboundShipmentRepository extends JpaRepository<InboundShipment
         @Param("lastUpdateDatetimeTo") LocalDate lastUpdateDatetimeTo,
         Pageable pageable
     );
+    
+    // Distinct query methods for caching
+    @Query(value = """
+        SELECT DISTINCT Scan_User 
+        FROM Inbound_Shipments 
+        WHERE Scan_User IS NOT NULL 
+        AND Scan_User <> ''
+        ORDER BY Scan_User
+        """, nativeQuery = true)
+    List<String> findDistinctScanUsers();
+    
+    @Query(value = """
+        SELECT DISTINCT Status 
+        FROM Inbound_Shipments 
+        WHERE Status IS NOT NULL 
+        AND Status <> ''
+        ORDER BY Status
+        """, nativeQuery = true)
+    List<String> findDistinctStatuses();
+    
+    // V2 Search method with client name support - simplified to avoid JOIN mapping issues
+    @Query(value = """
+        SELECT s.Row_ID, s.Client, s.Tracking_Number, s.Scanned_Number, s.Status, 
+               s.Email_ID, s.Order_Number, s.Ship_Date, s.Lab, s.Weight, 
+               s.Number_Of_Samples, s.Pickup_Time, s.Pickup_Time_2, 
+               s.Email_Receive_Datetime, s.Last_Update_Datetime, s.Scan_Time, 
+               s.Scan_User, s.Client_ID, s.Shipment_Type
+        FROM Inbound_Shipments s
+        WHERE (:trackingNumber IS NULL OR s.Tracking_Number LIKE CONCAT('%', :trackingNumber, '%'))
+        AND (:scannedNumber IS NULL OR s.Scanned_Number LIKE CONCAT('%', :scannedNumber, '%'))
+        AND (:status IS NULL OR s.Status LIKE CONCAT('%', :status, '%'))
+        AND (:orderNumber IS NULL OR s.Order_Number LIKE CONCAT('%', :orderNumber, '%'))
+        AND (:lab IS NULL OR s.Lab LIKE CONCAT('%', :lab, '%'))
+        AND (:scanUser IS NULL OR s.Scan_User LIKE CONCAT('%', :scanUser, '%'))
+        AND (:clientName IS NULL OR LOWER(s.Client) LIKE LOWER(CONCAT('%', :clientName, '%')))
+        AND (:shipDateFrom IS NULL OR s.Ship_Date >= :shipDateFrom)
+        AND (:shipDateTo IS NULL OR s.Ship_Date <= :shipDateTo)
+        AND (:scanDateFrom IS NULL OR CAST(s.Scan_Time AS DATE) >= :scanDateFrom)
+        AND (:scanDateTo IS NULL OR CAST(s.Scan_Time AS DATE) <= :scanDateTo)
+        AND (:emailReceiveDatetimeFrom IS NULL OR CAST(s.Email_Receive_Datetime AS DATE) >= :emailReceiveDatetimeFrom)
+        AND (:emailReceiveDatetimeTo IS NULL OR CAST(s.Email_Receive_Datetime AS DATE) <= :emailReceiveDatetimeTo)
+        AND (:lastUpdateDatetimeFrom IS NULL OR CAST(s.Last_Update_Datetime AS DATE) >= :lastUpdateDatetimeFrom)
+        AND (:lastUpdateDatetimeTo IS NULL OR CAST(s.Last_Update_Datetime AS DATE) <= :lastUpdateDatetimeTo)
+        ORDER BY s.Row_ID DESC
+        """, nativeQuery = true)
+    Page<InboundShipment> searchShipmentsV2(
+        @Param("trackingNumber") String trackingNumber,
+        @Param("scannedNumber") String scannedNumber,
+        @Param("status") String status,
+        @Param("orderNumber") String orderNumber,
+        @Param("lab") String lab,
+        @Param("scanUser") String scanUser,
+        @Param("clientName") String clientName,
+        @Param("shipDateFrom") LocalDate shipDateFrom,
+        @Param("shipDateTo") LocalDate shipDateTo,
+        @Param("scanDateFrom") LocalDate scanDateFrom,
+        @Param("scanDateTo") LocalDate scanDateTo,
+        @Param("emailReceiveDatetimeFrom") LocalDate emailReceiveDatetimeFrom,
+        @Param("emailReceiveDatetimeTo") LocalDate emailReceiveDatetimeTo,
+        @Param("lastUpdateDatetimeFrom") LocalDate lastUpdateDatetimeFrom,
+        @Param("lastUpdateDatetimeTo") LocalDate lastUpdateDatetimeTo,
+        Pageable pageable
+    );
 } 
