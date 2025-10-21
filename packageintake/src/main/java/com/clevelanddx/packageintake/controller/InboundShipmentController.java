@@ -1,6 +1,7 @@
 package com.clevelanddx.packageintake.controller;
 
 import com.clevelanddx.packageintake.dto.InboundShipmentSearchRequest;
+import com.clevelanddx.packageintake.dto.InboundShipmentSearchRequestV2;
 import com.clevelanddx.packageintake.dto.InboundShipmentSearchResponse;
 import com.clevelanddx.packageintake.model.InboundShipment;
 import com.clevelanddx.packageintake.service.InboundShipmentService;
@@ -277,6 +278,30 @@ public class InboundShipmentController {
             }
             
             InboundShipmentSearchResponse response = service.searchShipments(searchRequest);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    @PostMapping("/search/v2")
+    @Operation(summary = "Search inbound shipments with multiple criteria (V2)", 
+               description = "Search shipments by tracking number, scanned number, status, order number, lab, scan user, client name, and date ranges (ship date, scan date, email receive datetime, last update datetime). V2 includes client name search capability.")
+    @ApiResponse(responseCode = "200", description = "Search completed successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid search parameters")
+    public ResponseEntity<InboundShipmentSearchResponse> searchShipmentsV2(
+            @Parameter(description = "Search criteria including string fields for partial matching and date ranges. V2 adds client name search.") 
+            @RequestBody InboundShipmentSearchRequestV2 searchRequest) {
+        try {
+            // Validate pagination parameters
+            if (searchRequest.getPage() < 0) {
+                searchRequest.setPage(0);
+            }
+            if (searchRequest.getSize() <= 0 || searchRequest.getSize() > 1000) {
+                searchRequest.setSize(20);
+            }
+            
+            InboundShipmentSearchResponse response = service.searchShipmentsV2(searchRequest);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

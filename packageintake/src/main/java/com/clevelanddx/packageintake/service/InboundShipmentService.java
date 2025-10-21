@@ -1,6 +1,7 @@
 package com.clevelanddx.packageintake.service;
 
 import com.clevelanddx.packageintake.dto.InboundShipmentSearchRequest;
+import com.clevelanddx.packageintake.dto.InboundShipmentSearchRequestV2;
 import com.clevelanddx.packageintake.dto.InboundShipmentSearchResponse;
 import com.clevelanddx.packageintake.model.InboundShipment;
 
@@ -35,6 +36,9 @@ public interface InboundShipmentService {
     
     // Search method
     InboundShipmentSearchResponse searchShipments(InboundShipmentSearchRequest searchRequest);
+    
+    // V2 Search method with client name support
+    InboundShipmentSearchResponse searchShipmentsV2(InboundShipmentSearchRequestV2 searchRequest);
     
     // Distinct list methods with caching
     List<String> getDistinctScanUsers();
