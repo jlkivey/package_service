@@ -1,10 +1,12 @@
 package com.clevelanddx.packageintake.service;
 
 import com.clevelanddx.packageintake.dto.InboundShipmentSearchRequest;
+import com.clevelanddx.packageintake.dto.InboundShipmentSearchRequestV2;
 import com.clevelanddx.packageintake.dto.InboundShipmentSearchResponse;
 import com.clevelanddx.packageintake.model.InboundShipment;
 import com.clevelanddx.packageintake.model.InboundShipmentReference;
 import com.clevelanddx.packageintake.repository.InboundShipmentRepository;
+import com.clevelanddx.packageintake.repository.InboundShipmentRepositoryImpl;
 import com.clevelanddx.packageintake.service.InboundShipmentReferenceService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.LocalDate;
@@ -23,12 +29,16 @@ import java.util.Optional;
 @Transactional
 public class InboundShipmentServiceImpl implements InboundShipmentService {
 
+    private static final Logger log = LoggerFactory.getLogger(InboundShipmentServiceImpl.class);
+    
     private final InboundShipmentRepository repository;
+    private final InboundShipmentRepositoryImpl repositoryImpl;
     private final InboundShipmentReferenceService referenceService;
 
     @Autowired
-    public InboundShipmentServiceImpl(InboundShipmentRepository repository, InboundShipmentReferenceService referenceService) {
+    public InboundShipmentServiceImpl(InboundShipmentRepository repository, InboundShipmentRepositoryImpl repositoryImpl, InboundShipmentReferenceService referenceService) {
         this.repository = repository;
+        this.repositoryImpl = repositoryImpl;
         this.referenceService = referenceService;
     }
 
@@ -241,5 +251,88 @@ public class InboundShipmentServiceImpl implements InboundShipmentService {
             .hasNext(page.hasNext())
             .hasPrevious(page.hasPrevious())
             .build();
+    }
+    
+    @Override
+    public InboundShipmentSearchResponse searchShipmentsV2(InboundShipmentSearchRequestV2 searchRequest) {
+        log.debug("=== V2 Search Started ===");
+        log.debug("Search Request Parameters:");
+        log.debug("  - trackingNumber: {}", searchRequest.getTrackingNumber());
+        log.debug("  - scannedNumber: {}", searchRequest.getScannedNumber());
+        log.debug("  - status: {}", searchRequest.getStatus());
+        log.debug("  - orderNumber: {}", searchRequest.getOrderNumber());
+        log.debug("  - lab: {}", searchRequest.getLab());
+        log.debug("  - scanUser: {}", searchRequest.getScanUser());
+        log.debug("  - clientName: {}", searchRequest.getClientName());
+        log.debug("  - shipDateFrom: {}", searchRequest.getShipDateFrom());
+        log.debug("  - shipDateTo: {}", searchRequest.getShipDateTo());
+        log.debug("  - scanDateFrom: {}", searchRequest.getScanDateFrom());
+        log.debug("  - scanDateTo: {}", searchRequest.getScanDateTo());
+        log.debug("  - emailReceiveDatetimeFrom: {}", searchRequest.getEmailReceiveDatetimeFrom());
+        log.debug("  - emailReceiveDatetimeTo: {}", searchRequest.getEmailReceiveDatetimeTo());
+        log.debug("  - lastUpdateDatetimeFrom: {}", searchRequest.getLastUpdateDatetimeFrom());
+        log.debug("  - lastUpdateDatetimeTo: {}", searchRequest.getLastUpdateDatetimeTo());
+        log.debug("  - page: {}", searchRequest.getPage());
+        log.debug("  - size: {}", searchRequest.getSize());
+        
+        // Create pageable object
+        Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize());
+        log.debug("Created Pageable: page={}, size={}", searchRequest.getPage(), searchRequest.getSize());
+        
+        log.debug("Calling repositoryImpl.searchShipmentsV2WithLogging()...");
+        // Call repository V2 search method with logging
+        Page<InboundShipment> page = repositoryImpl.searchShipmentsV2WithLogging(
+            searchRequest.getTrackingNumber(),
+            searchRequest.getScannedNumber(),
+            searchRequest.getStatus(),
+            searchRequest.getOrderNumber(),
+            searchRequest.getLab(),
+            searchRequest.getScanUser(),
+            searchRequest.getClientName(),
+            searchRequest.getShipDateFrom(),
+            searchRequest.getShipDateTo(),
+            searchRequest.getScanDateFrom(),
+            searchRequest.getScanDateTo(),
+            searchRequest.getEmailReceiveDatetimeFrom(),
+            searchRequest.getEmailReceiveDatetimeTo(),
+            searchRequest.getLastUpdateDatetimeFrom(),
+            searchRequest.getLastUpdateDatetimeTo(),
+            pageable
+        );
+        
+        log.debug("Repository returned: {} results, total elements: {}, total pages: {}", 
+                 page.getContent().size(), page.getTotalElements(), page.getTotalPages());
+        
+        // Build response
+        InboundShipmentSearchResponse response = InboundShipmentSearchResponse.builder()
+            .shipments(page.getContent())
+            .totalElements(page.getTotalElements())
+            .totalPages(page.getTotalPages())
+            .currentPage(page.getNumber())
+            .pageSize(page.getSize())
+            .hasNext(page.hasNext())
+            .hasPrevious(page.hasPrevious())
+            .build();
+            
+        log.debug("=== V2 Search Completed ===");
+        return response;
+    }
+    
+    @Override
+    @Cacheable(value = "scanUsers", key = "'all'")
+    public List<String> getDistinctScanUsers() {
+        return repository.findDistinctScanUsers();
+    }
+
+    @Override
+    @Cacheable(value = "statuses", key = "'all'")
+    public List<String> getDistinctStatuses() {
+        return repository.findDistinctStatuses();
+    }
+    
+    @CacheEvict(value = {"scanUsers", "statuses"}, allEntries = true)
+    public void evictDistinctListsCache() {
+        // This method will clear the cache for both scan users and statuses
+        // The @CacheEvict annotation handles the actual cache clearing
     }
 } 

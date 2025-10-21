@@ -1,6 +1,7 @@
 package com.clevelanddx.packageintake.controller;
 
 import com.clevelanddx.packageintake.dto.InboundShipmentSearchRequest;
+import com.clevelanddx.packageintake.dto.InboundShipmentSearchRequestV2;
 import com.clevelanddx.packageintake.dto.InboundShipmentSearchResponse;
 import com.clevelanddx.packageintake.model.InboundShipment;
 import com.clevelanddx.packageintake.service.InboundShipmentService;
@@ -281,5 +282,58 @@ public class InboundShipmentController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+    
+    @PostMapping("/search/v2")
+    @Operation(summary = "Search inbound shipments with multiple criteria (V2)", 
+               description = "Search shipments by tracking number, scanned number, status, order number, lab, scan user, client name, and date ranges (ship date, scan date, email receive datetime, last update datetime). V2 includes client name search capability.")
+    @ApiResponse(responseCode = "200", description = "Search completed successfully")
+    @ApiResponse(responseCode = "400", description = "Invalid search parameters")
+    public ResponseEntity<InboundShipmentSearchResponse> searchShipmentsV2(
+            @Parameter(description = "Search criteria including string fields for partial matching and date ranges. V2 adds client name search.") 
+            @RequestBody InboundShipmentSearchRequestV2 searchRequest) {
+        try {
+            // Validate pagination parameters
+            if (searchRequest.getPage() < 0) {
+                searchRequest.setPage(0);
+            }
+            if (searchRequest.getSize() <= 0 || searchRequest.getSize() > 1000) {
+                searchRequest.setSize(20);
+            }
+            
+            InboundShipmentSearchResponse response = service.searchShipmentsV2(searchRequest);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    @GetMapping("/distinct/scan-users")
+    @Operation(summary = "Get all distinct scan users", 
+               description = "Returns a cached list of all unique scan users from the inbound shipments table")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved distinct scan users")
+    @ApiResponse(responseCode = "204", description = "No scan users found")
+    public ResponseEntity<List<String>> getDistinctScanUsers() {
+        List<String> scanUsers = service.getDistinctScanUsers();
+        return scanUsers.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(scanUsers);
+    }
+
+    @GetMapping("/distinct/statuses")
+    @Operation(summary = "Get all distinct statuses", 
+               description = "Returns a cached list of all unique statuses from the inbound shipments table")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved distinct statuses")
+    @ApiResponse(responseCode = "204", description = "No statuses found")
+    public ResponseEntity<List<String>> getDistinctStatuses() {
+        List<String> statuses = service.getDistinctStatuses();
+        return statuses.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(statuses);
+    }
+    
+    @PostMapping("/distinct/refresh-cache")
+    @Operation(summary = "Refresh distinct lists cache", 
+               description = "Manually refreshes the cache for distinct scan users and statuses. Use this when you know the data has changed.")
+    @ApiResponse(responseCode = "200", description = "Cache refreshed successfully")
+    public ResponseEntity<String> refreshDistinctListsCache() {
+        service.evictDistinctListsCache();
+        return ResponseEntity.ok("Cache refreshed successfully. Next requests will fetch fresh data from the database.");
     }
 } 
