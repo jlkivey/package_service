@@ -115,4 +115,11 @@ public class CLIAAdminController {
     public ResponseEntity<Boolean> existsByUserId(@PathVariable String userId) {
         return ResponseEntity.ok(service.existsByUserId(userId));
     }
+
+    @GetMapping("/is-admin/{userId}")
+    @Operation(summary = "Check if user is a CLIA admin")
+    @ApiResponse(responseCode = "200", description = "True if user is admin, false otherwise")
+    public ResponseEntity<Boolean> isAdmin(@PathVariable String userId) {
+        return ResponseEntity.ok(service.existsByUserId(userId));
+    }
 }
