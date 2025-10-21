@@ -115,4 +115,11 @@ public class CLIAMemberController {
     public ResponseEntity<Boolean> existsByUserId(@PathVariable String userId) {
         return ResponseEntity.ok(service.existsByUserId(userId));
     }
+
+    @GetMapping("/is-member/{userId}")
+    @Operation(summary = "Check if user is a CLIA member")
+    @ApiResponse(responseCode = "200", description = "True if user is member, false otherwise")
+    public ResponseEntity<Boolean> isMember(@PathVariable String userId) {
+        return ResponseEntity.ok(service.existsByUserId(userId));
+    }
 }
