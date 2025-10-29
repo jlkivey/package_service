@@ -3,7 +3,6 @@ package com.clevelanddx.packageintake.repository;
 import com.clevelanddx.packageintake.model.InboundShipment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -110,12 +109,62 @@ public class InboundShipmentRepositoryImpl {
             
             log.debug("Query parameters set successfully");
             
+            // Build WHERE clause for reuse
+            String whereClause = """
+            WHERE (:trackingNumber IS NULL OR s.Tracking_Number LIKE CONCAT('%', :trackingNumber, '%'))
+            AND (:scannedNumber IS NULL OR s.Scanned_Number LIKE CONCAT('%', :scannedNumber, '%'))
+            AND (:status IS NULL OR s.Status LIKE CONCAT('%', :status, '%'))
+            AND (:orderNumber IS NULL OR s.Order_Number LIKE CONCAT('%', :orderNumber, '%'))
+            AND (:lab IS NULL OR s.Lab LIKE CONCAT('%', :lab, '%'))
+            AND (:scanUser IS NULL OR s.Scan_User LIKE CONCAT('%', :scanUser, '%'))
+            AND (:clientName IS NULL OR LOWER(s.Client) LIKE LOWER(CONCAT('%', :clientName, '%')))
+            AND (:shipDateFrom IS NULL OR s.Ship_Date >= :shipDateFrom)
+            AND (:shipDateTo IS NULL OR s.Ship_Date <= :shipDateTo)
+            AND (:scanDateFrom IS NULL OR CAST(s.Scan_Time AS DATE) >= :scanDateFrom)
+            AND (:scanDateTo IS NULL OR CAST(s.Scan_Time AS DATE) <= :scanDateTo)
+            AND (:emailReceiveDatetimeFrom IS NULL OR CAST(s.Email_Receive_Datetime AS DATE) >= :emailReceiveDatetimeFrom)
+            AND (:emailReceiveDatetimeTo IS NULL OR CAST(s.Email_Receive_Datetime AS DATE) <= :emailReceiveDatetimeTo)
+            AND (:lastUpdateDatetimeFrom IS NULL OR CAST(s.Last_Update_Datetime AS DATE) >= :lastUpdateDatetimeFrom)
+            AND (:lastUpdateDatetimeTo IS NULL OR CAST(s.Last_Update_Datetime AS DATE) <= :lastUpdateDatetimeTo)
+            """;
+            
+            // Execute count query first to get total
+            String countQueryString = "SELECT COUNT(*) FROM Inbound_Shipments s " + whereClause;
+            Query countQuery = entityManager.createNativeQuery(countQueryString);
+            
+            // Set count query parameters
+            countQuery.setParameter("trackingNumber", trackingNumber);
+            countQuery.setParameter("scannedNumber", scannedNumber);
+            countQuery.setParameter("status", status);
+            countQuery.setParameter("orderNumber", orderNumber);
+            countQuery.setParameter("lab", lab);
+            countQuery.setParameter("scanUser", scanUser);
+            countQuery.setParameter("clientName", clientName);
+            countQuery.setParameter("shipDateFrom", shipDateFrom);
+            countQuery.setParameter("shipDateTo", shipDateTo);
+            countQuery.setParameter("scanDateFrom", scanDateFrom);
+            countQuery.setParameter("scanDateTo", scanDateTo);
+            countQuery.setParameter("emailReceiveDatetimeFrom", emailReceiveDatetimeFrom);
+            countQuery.setParameter("emailReceiveDatetimeTo", emailReceiveDatetimeTo);
+            countQuery.setParameter("lastUpdateDatetimeFrom", lastUpdateDatetimeFrom);
+            countQuery.setParameter("lastUpdateDatetimeTo", lastUpdateDatetimeTo);
+            
+            Long total = ((Number) countQuery.getSingleResult()).longValue();
+            log.debug("Total count: {}", total);
+            
+            // Apply pagination to main query
+            query.setFirstResult((int) pageable.getOffset());
+            query.setMaxResults(pageable.getPageSize());
+            
+            log.debug("Pagination: offset={}, pageSize={}", pageable.getOffset(), pageable.getPageSize());
+            
             // Execute query
-            List<InboundShipment> results = query.getResultList();
+            @SuppressWarnings("unchecked")
+            List<InboundShipment> results = (List<InboundShipment>) query.getResultList();
             log.debug("Query executed successfully, found {} results", results.size());
             
-            // For now, return a simple page - you might want to implement proper pagination
-            return new org.springframework.data.domain.PageImpl<>(results, pageable, results.size());
+            // Return paginated results with correct total count
+            return new org.springframework.data.domain.PageImpl<>(results, pageable, total);
             
         } catch (Exception e) {
             log.error("Error executing V2 search query", e);
