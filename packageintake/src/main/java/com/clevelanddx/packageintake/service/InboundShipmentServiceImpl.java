@@ -78,39 +78,53 @@ public class InboundShipmentServiceImpl implements InboundShipmentService {
         return repository.findById(id)
                 .map(existingShipment -> {
                     // Handle shipmentType reference properly
+                    InboundShipmentReference resolvedShipmentType = null;
                     if (shipment.getShipmentType() != null) {
                         // If shipmentType has an ID, try to find the existing reference
                         if (shipment.getShipmentType().getRowId() != null) {
                             Optional<InboundShipmentReference> existingReference = 
                                 referenceService.getReferenceById(shipment.getShipmentType().getRowId());
                             if (existingReference.isPresent()) {
-                                shipment.setShipmentType(existingReference.get());
-                            } else {
-                                // If reference doesn't exist, set to null to avoid error
-                                shipment.setShipmentType(null);
+                                resolvedShipmentType = existingReference.get();
                             }
                         } else {
                             // If shipmentType has no ID but has type/value, try to find existing or create new
                             if (shipment.getShipmentType().getType() != null && shipment.getShipmentType().getValue() != null) {
-                                InboundShipmentReference foundOrCreated = referenceService.findOrCreateReference(
+                                resolvedShipmentType = referenceService.findOrCreateReference(
                                     shipment.getShipmentType().getType(), 
                                     shipment.getShipmentType().getValue(),
                                     shipment.getShipmentType().getDescription()
                                 );
-                                shipment.setShipmentType(foundOrCreated);
-                            } else {
-                                // If no identifying information, set to null
-                                shipment.setShipmentType(null);
                             }
                         }
                     }
                     
+                    // Update the current shipment
                     shipment.setRowId(id);
+                    shipment.setShipmentType(resolvedShipmentType);
                     shipment.setLastUpdateDatetime(LocalDateTime.now());
                     if (shipment.getScanTime() == null) {
                         shipment.setScanTime(existingShipment.getScanTime());
                     }
-                    return repository.save(shipment);
+                    InboundShipment updatedShipment = repository.save(shipment);
+                    
+                    // If shipment type changed and tracking number exists, update all shipments with same tracking number
+                    String trackingNumber = updatedShipment.getTrackingNumber();
+                    if (trackingNumber != null && !trackingNumber.isEmpty()) {
+                        List<InboundShipment> shipmentsWithSameTracking = repository.findAllByTrackingNumber(trackingNumber);
+                        for (InboundShipment relatedShipment : shipmentsWithSameTracking) {
+                            // Skip the one we just updated
+                            if (!relatedShipment.getRowId().equals(id)) {
+                                relatedShipment.setShipmentType(resolvedShipmentType);
+                                relatedShipment.setLastUpdateDatetime(LocalDateTime.now());
+                                repository.save(relatedShipment);
+                                log.debug("Updated shipment type for shipment ID {} (tracking number: {})", 
+                                         relatedShipment.getRowId(), trackingNumber);
+                            }
+                        }
+                    }
+                    
+                    return updatedShipment;
                 })
                 .orElseThrow(() -> new EntityNotFoundException("Shipment not found with id: " + id));
     }

@@ -67,3 +67,7 @@ logs/
 # *.jks
 # *.p12
 # *.pfx
+
+# Local properties files
+application-dev-local.properties
+application-prod-local.properties
