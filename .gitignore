@@ -67,3 +67,9 @@ logs/
 # *.jks
 # *.p12
 # *.pfx
+
+# Local & secret-bearing config — never commit real credentials.
+# Committed config uses ${ENV_VAR} placeholders; these local variants hold real values.
+*.prop
+*-local.properties
+application-dev.properties
